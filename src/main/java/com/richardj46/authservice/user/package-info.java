@@ -1,2 +1,2 @@
 /** User profiles, persistence, and account management. */
-package com.example.authservice.user;
+package com.richardj46.authservice.user;

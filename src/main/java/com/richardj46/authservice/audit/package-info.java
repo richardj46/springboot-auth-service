@@ -1,2 +1,2 @@
 /** Security and application audit records. */
-package com.example.authservice.audit;
+package com.richardj46.authservice.audit;

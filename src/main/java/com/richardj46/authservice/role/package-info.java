@@ -1,2 +1,2 @@
 /** Roles, permissions, and authorization models. */
-package com.example.authservice.role;
+package com.richardj46.authservice.role;

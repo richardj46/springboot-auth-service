@@ -1,2 +1,2 @@
 /** Transactional email services and templates. */
-package com.example.authservice.mail;
+package com.richardj46.authservice.mail;

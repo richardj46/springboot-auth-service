@@ -1,2 +1,2 @@
 /** Spring Security and JWT infrastructure. */
-package com.example.authservice.security;
+package com.richardj46.authservice.security;

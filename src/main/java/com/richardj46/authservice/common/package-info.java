@@ -1,2 +1,2 @@
 /** Shared application types and utilities. */
-package com.example.authservice.common;
+package com.richardj46.authservice.common;

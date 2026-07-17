@@ -1,2 +1,2 @@
 /** Access, refresh, verification, and recovery tokens. */
-package com.example.authservice.token;
+package com.richardj46.authservice.token;

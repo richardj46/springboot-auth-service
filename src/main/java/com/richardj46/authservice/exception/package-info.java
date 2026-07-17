@@ -1,2 +1,2 @@
 /** Application exceptions and global error handling. */
-package com.example.authservice.exception;
+package com.richardj46.authservice.exception;
