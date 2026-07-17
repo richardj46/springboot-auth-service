@@ -1,10 +1,10 @@
-package rjiang.springboot.auth;
+package com.richardj46.authservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SpringbootAuthServiceApplicationTests {
+class AuthServiceApplicationTests {
 
     @Test
     void contextLoads() {
