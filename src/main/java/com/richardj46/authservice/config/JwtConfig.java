@@ -1,8 +1,12 @@
 package com.richardj46.authservice.config;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
+import com.richardj46.authservice.token.RotatingJwtDecoder;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -17,29 +21,46 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 
+import jakarta.annotation.PostConstruct;
+
 @Configuration
-@EnableConfigurationProperties({JwtProperties.class, CorsProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, CorsProperties.class, SecurityProperties.class})
 public class JwtConfig {
 
+    private final JwtProperties jwtProperties;
+
+    public JwtConfig(JwtProperties jwtProperties) {
+        this.jwtProperties = jwtProperties;
+    }
+
+    @PostConstruct
+    void validateJwtProperties() {
+        jwtProperties.validate();
+    }
+
     @Bean
-    JwtEncoder jwtEncoder(JwtProperties jwtProperties) {
-        byte[] secret = jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8);
+    JwtEncoder jwtEncoder(JwtProperties properties) {
+        byte[] secret = properties.getSecret().getBytes(StandardCharsets.UTF_8);
         OctetSequenceKey jwk = new OctetSequenceKey.Builder(secret)
                 .algorithm(com.nimbusds.jose.JWSAlgorithm.HS256)
-                .keyID("auth-hmac-key")
+                .keyID(properties.getKeyId())
                 .build();
         return new NimbusJwtEncoder(new ImmutableJWKSet<>(new JWKSet(jwk)));
     }
 
     @Bean
-    JwtDecoder jwtDecoder(JwtProperties jwtProperties) {
-        return NimbusJwtDecoder.withSecretKey(secretKey(jwtProperties))
-                .macAlgorithm(MacAlgorithm.HS256)
-                .build();
+    JwtDecoder jwtDecoder(JwtProperties properties) {
+        List<JwtDecoder> decoders = new ArrayList<>();
+        for (String secret : properties.allSecrets()) {
+            decoders.add(NimbusJwtDecoder.withSecretKey(toSecretKey(secret))
+                    .macAlgorithm(MacAlgorithm.HS256)
+                    .build());
+        }
+        return new RotatingJwtDecoder(decoders);
     }
 
-    private static SecretKey secretKey(JwtProperties jwtProperties) {
-        byte[] keyBytes = jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8);
+    private static SecretKey toSecretKey(String secret) {
+        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
         return new SecretKeySpec(keyBytes, "HmacSHA256");
     }
 }

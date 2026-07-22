@@ -1,0 +1,21 @@
+server:
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+    include-exception: false
+  forward-headers-strategy: framework
+
+spring:
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+app:
+  jwt:
+    refresh-cookie-secure: true
+    refresh-cookie-same-site: None
+  security:
+    require-https: true
