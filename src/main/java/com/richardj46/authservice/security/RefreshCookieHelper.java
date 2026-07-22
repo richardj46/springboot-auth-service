@@ -22,25 +22,11 @@ public class RefreshCookieHelper {
     }
 
     public void setRefreshCookie(HttpServletResponse response, String rawToken) {
-        ResponseCookie cookie = ResponseCookie.from(jwtProperties.getRefreshCookieName(), rawToken)
-                .httpOnly(true)
-                .secure(jwtProperties.isRefreshCookieSecure())
-                .sameSite("Lax")
-                .path(AUTH_COOKIE_PATH)
-                .maxAge(jwtProperties.getRefreshTtl())
-                .build();
-        response.addHeader("Set-Cookie", cookie.toString());
+        response.addHeader("Set-Cookie", buildCookie(rawToken, jwtProperties.getRefreshTtl()).toString());
     }
 
     public void clearRefreshCookie(HttpServletResponse response) {
-        ResponseCookie cookie = ResponseCookie.from(jwtProperties.getRefreshCookieName(), "")
-                .httpOnly(true)
-                .secure(jwtProperties.isRefreshCookieSecure())
-                .sameSite("Lax")
-                .path(AUTH_COOKIE_PATH)
-                .maxAge(Duration.ZERO)
-                .build();
-        response.addHeader("Set-Cookie", cookie.toString());
+        response.addHeader("Set-Cookie", buildCookie("", Duration.ZERO).toString());
     }
 
     public String readRefreshCookie(Cookie[] cookies) {
@@ -55,5 +41,15 @@ public class RefreshCookieHelper {
         }
 
         return null;
+    }
+
+    private ResponseCookie buildCookie(String value, Duration maxAge) {
+        return ResponseCookie.from(jwtProperties.getRefreshCookieName(), value)
+                .httpOnly(true)
+                .secure(jwtProperties.isRefreshCookieSecure())
+                .sameSite(jwtProperties.getRefreshCookieSameSite())
+                .path(AUTH_COOKIE_PATH)
+                .maxAge(maxAge)
+                .build();
     }
 }

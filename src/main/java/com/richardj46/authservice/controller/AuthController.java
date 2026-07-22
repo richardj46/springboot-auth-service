@@ -33,17 +33,19 @@ public class AuthController {
 
     @PostMapping("/register")
     public RegisteredUserResponse register(
-            @Valid @RequestBody RegisterRequest request
+            @Valid @RequestBody RegisterRequest request,
+            HttpServletRequest httpRequest
     ) {
-        return authService.register(request);
+        return authService.register(request, httpRequest);
     }
 
     @PostMapping("/login")
     public TokenResponse login(
             @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest,
             HttpServletResponse response
     ) {
-        return authService.login(request, response);
+        return authService.login(request, httpRequest, response);
     }
 
     @PostMapping("/refresh")
@@ -51,7 +53,7 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        return authService.refresh(request.getCookies(), response);
+        return authService.refresh(request.getCookies(), request, response);
     }
 
     @PostMapping("/logout")
@@ -59,7 +61,7 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        authService.logout(request.getCookies(), response);
+        authService.logout(request.getCookies(), request, response);
         return ResponseEntity.noContent().build();
     }
 

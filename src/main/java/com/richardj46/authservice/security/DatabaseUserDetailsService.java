@@ -2,6 +2,7 @@ package com.richardj46.authservice.security;
 
 import java.util.Locale;
 
+import com.richardj46.authservice.entity.Role;
 import com.richardj46.authservice.entity.User;
 import com.richardj46.authservice.repository.UserRepository;
 
@@ -26,10 +27,20 @@ public class DatabaseUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("Invalid email or password"));
 
+        return toUserDetails(user);
+    }
+
+    public UserDetails toUserDetails(User user) {
+        String[] authorities = user.getRoles().stream()
+                .map(Role::getName)
+                .toArray(String[]::new);
+
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())
                 .password(user.getPassword())
-                .authorities("ROLE_USER")
+                .disabled(!user.isEnabled())
+                .accountLocked(user.isAccountLocked())
+                .authorities(authorities)
                 .build();
     }
 }

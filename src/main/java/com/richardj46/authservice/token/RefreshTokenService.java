@@ -63,6 +63,11 @@ public class RefreshTokenService {
                 });
     }
 
+    @Transactional
+    public void revokeAllForUser(UUID userId) {
+        refreshTokenRepository.revokeAllByUserId(userId, Instant.now());
+    }
+
     public RefreshToken findValidToken(String rawToken) {
         return refreshTokenRepository.findByTokenHash(hashToken(rawToken))
                 .filter(RefreshToken::isValid)

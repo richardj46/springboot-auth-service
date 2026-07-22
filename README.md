@@ -1,13 +1,8 @@
-# Production-Ready Spring Boot Authentication Service
+# Spring Boot Auth Service
 
-> A production-ready authentication and authorization service built with **Spring Boot**, **Spring Security**, **JWT**, **PostgreSQL**, and **Docker**. This project provides a secure foundation for modern backend applications with REST APIs, role-based access control, refresh tokens, database migrations, and production best practices.
+A production-ready authentication and authorization service built with **Spring Boot 3**, **Spring Security**, **JWT**, and **PostgreSQL**.
 
-![Java](https://img.shields.io/badge/Java-21-orange)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen)
-![Spring Security](https://img.shields.io/badge/Spring%20Security-6-green)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
-![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED)
-![License](https://img.shields.io/badge/License-MIT-blue)
+This project provides secure user authentication for modern web applications using short-lived JWT access tokens and rotating refresh tokens. It is designed as the backend for the **springboot-auth-web** React frontend.
 
 ---
 
@@ -15,346 +10,246 @@
 
 ### Authentication
 
-- User registration
-- User login
-- User logout
-- JWT Access Token
-- JWT Refresh Token
-- Refresh token rotation
-- Token revocation
+* User registration
+* User login
+* JWT access tokens
+* Refresh token rotation
+* Secure logout
+* Stateless authentication
+* Password hashing with BCrypt
 
-### User Management
+### Spring Security
 
-- Get current user profile
-- Update profile
-- Change password
-- Delete account
+* Built on Spring Security
+* JWT authentication filter
+* Role-based authorization
+* Protected REST endpoints
+* Security filter chain configuration
+* CORS configuration for frontend integration
 
-### Authorization
+### Refresh Token Strategy
 
-- Role-Based Access Control (RBAC)
-- User roles
-- Method-level authorization
-- Protected REST endpoints
+* Short-lived JWT access token
+* Opaque refresh token
+* Refresh token rotation
+* Refresh token revocation on logout
+* Secure HttpOnly cookie support
+* Compatible with SPA applications
 
-### Account Security
+### Database
 
-- Email verification
-- Forgot password
-- Password reset
-- Password hashing with BCrypt
-- Login attempt limiting
-- Account lockout
-- Strong password policy
+* PostgreSQL
+* Spring Data JPA
+* Hibernate ORM
 
-### Production Features
+### Frontend Integration
 
-- Global exception handling
-- Request validation
-- DTO pattern
-- Flyway database migrations
-- Structured logging
-- OpenAPI / Swagger documentation
-- Docker support
-- GitHub Actions CI
-- Health checks
-- Environment-based configuration
+Integrated with the companion project:
+
+* **springboot-auth-web**
+* React
+* Vite
+* TypeScript
+
+Authentication flow:
+
+1. User logs in.
+2. Backend returns JWT access token.
+3. Backend sets refresh token cookie.
+4. Frontend stores access token in memory.
+5. Protected requests use:
+
+Authorization: Bearer <access_token>
+
+6. When expired, frontend calls:
+
+```
+POST /api/auth/refresh
+```
+
+7. Backend rotates the refresh token and returns a new access token.
 
 ---
 
 ## Technology Stack
 
-| Category | Technology |
-|-----------|------------|
-| Language | Java 21 |
-| Framework | Spring Boot 3 |
-| Security | Spring Security 6 |
-| Authentication | JWT |
-| Password Hashing | BCrypt |
-| Database | PostgreSQL |
-| ORM | Spring Data JPA (Hibernate) |
-| Migration | Flyway |
-| Validation | Jakarta Validation |
-| Build Tool | Maven |
-| Documentation | OpenAPI / Swagger |
-| Testing | JUnit 5, Mockito, Testcontainers |
-| Containerization | Docker & Docker Compose |
+| Technology      | Version         |
+| --------------- | --------------- |
+| Java            | 21              |
+| Spring Boot     | 3.x             |
+| Spring Security | 6.x             |
+| Spring Data JPA | Latest          |
+| Hibernate       | 6.x             |
+| PostgreSQL      | 16+             |
+| Maven           | 3.9+            |
+| JWT             | JJWT            |
+| BCrypt          | Spring Security |
 
 ---
 
 ## Project Structure
 
-```text
-auth-service
-├── src
-│   ├── main
-│   │   ├── java
-│   │   │   └── com.example.auth
-│   │   │       ├── auth
-│   │   │       ├── user
-│   │   │       ├── role
-│   │   │       ├── security
-│   │   │       ├── common
-│   │   │       ├── config
-│   │   │       └── exception
-│   │   └── resources
-│   │       ├── db
-│   │       │   └── migration
-│   │       ├── application.yml
-│   │       ├── application-dev.yml
-│   │       └── application-prod.yml
-│   └── test
-├── docker
-├── .github
-│   └── workflows
-├── Dockerfile
-├── docker-compose.yml
-├── pom.xml
-└── README.md
+```
+src
+└── main
+    ├── java
+    │   └── com.richardj46.authservice
+    │       ├── config
+    │       ├── controller
+    │       ├── dto
+    │       ├── entity
+    │       ├── repository
+    │       ├── security
+    │       ├── service
+    │       └── util
+    └── resources
+        └── application.yml
 ```
 
 ---
 
-## REST APIs
+## API Endpoints
 
 ### Authentication
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/auth/register` | Register new user |
-| POST | `/api/v1/auth/login` | User login |
-| POST | `/api/v1/auth/refresh` | Refresh access token |
-| POST | `/api/v1/auth/logout` | Logout |
-| POST | `/api/v1/auth/verify-email` | Verify email |
-| POST | `/api/v1/auth/forgot-password` | Request password reset |
-| POST | `/api/v1/auth/reset-password` | Reset password |
-
-### User
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/users/me` | Current user |
-| PUT | `/api/v1/users/me` | Update profile |
-| PUT | `/api/v1/users/password` | Change password |
-| DELETE | `/api/v1/users/me` | Delete account |
-
-### Administration
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/admin/users` | List users |
-| PUT | `/api/v1/admin/users/{id}/role` | Update user role |
-| PUT | `/api/v1/admin/users/{id}/disable` | Disable user |
+| Method | Endpoint             | Description          |
+| ------ | -------------------- | -------------------- |
+| POST   | `/api/auth/register` | Register a new user  |
+| POST   | `/api/auth/login`    | Login                |
+| POST   | `/api/auth/refresh`  | Refresh access token |
+| POST   | `/api/auth/logout`   | Logout               |
 
 ---
 
-## Authentication Flow
+## Environment Variables
 
-```text
-Client
-   │
-   │ Login
-   ▼
-Auth Controller
-   │
-   ▼
-Authentication Service
-   │
-   ▼
-Spring Security
-   │
-   ▼
-PostgreSQL
-   │
-   ▼
-Generate JWT
-   │
-   ▼
-Access Token + Refresh Token
+```
+DATABASE_URL=
+DATABASE_USERNAME=
+DATABASE_PASSWORD=
+
+JWT_SECRET=
+JWT_EXPIRATION=
+
+REFRESH_TOKEN_EXPIRATION=
+```
+
+Example:
+
+```
+DATABASE_URL=jdbc:postgresql://localhost:5432/authdb
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=password
+
+JWT_SECRET=your-256-bit-secret
+JWT_EXPIRATION=900000
+
+REFRESH_TOKEN_EXPIRATION=604800000
 ```
 
 ---
 
-## Database Schema
+## Running the Project
 
-```text
-users
+### Clone
 
-roles
-
-permissions
-
-user_roles
-
-role_permissions
-
-refresh_tokens
-
-password_reset_tokens
-
-email_verification_tokens
-
-login_attempts
-
-audit_logs
+```
+git clone https://github.com/<username>/springboot-auth-service.git
 ```
 
----
+### Configure Environment
 
-## Getting Started
+Create your environment variables or configure them in your IDE.
 
-### Prerequisites
+### Run
 
-- Java 21
-- Maven
-- Docker
-- Docker Compose
-- PostgreSQL (optional when using Docker)
-
----
-
-### Clone Repository
-
-```bash
-git clone https://github.com/your-username/auth-service.git
-
-cd auth-service
 ```
-
----
-
-### Run with Docker
-
-```bash
-docker compose up --build
-```
-
-The application will start together with PostgreSQL.
-
----
-
-### Run Locally
-
-Start PostgreSQL.
-
-Configure your environment variables.
-
-Run:
-
-```bash
 ./mvnw spring-boot:run
 ```
 
 or
 
-```bash
+```
 mvn spring-boot:run
 ```
 
 ---
 
-## Configuration
+## Authentication Flow
 
-Example environment variables:
-
-```env
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/authdb
-SPRING_DATASOURCE_USERNAME=postgres
-SPRING_DATASOURCE_PASSWORD=password
-
-JWT_SECRET=your-super-secret-key
-JWT_ACCESS_TOKEN_EXPIRATION=900
-JWT_REFRESH_TOKEN_EXPIRATION=2592000
+```
+Register
+      │
+      ▼
+ Login
+      │
+      ▼
+Access JWT + Refresh Cookie
+      │
+      ▼
+Protected API
+      │
+      ▼
+JWT Expired
+      │
+      ▼
+POST /api/auth/refresh
+      │
+      ▼
+New Access JWT
+      │
+      ▼
+Continue
 ```
 
 ---
 
-## Security
+## Security Design
 
-This project follows common production security practices.
-
-- JWT authentication
-- Refresh token rotation
-- BCrypt password hashing
-- Role-based authorization
-- Input validation
-- Global exception handling
-- Security headers
-- HTTPS ready
-- SQL injection protection through JPA
-- Password reset tokens
-- Email verification
-- Login rate limiting
-- Account locking
+* Stateless authentication
+* JWT access tokens
+* Rotating refresh tokens
+* BCrypt password hashing
+* Spring Security authorization
+* Secure cookie support
+* Refresh token revocation
+* CSRF-safe authentication strategy for SPA clients
+* CORS restricted to trusted frontend origins
 
 ---
 
-## Testing
+## Companion Frontend
 
-Run all tests:
+Frontend repository:
 
-```bash
-mvn test
-```
+**springboot-auth-web**
 
-Test types include:
+Built with:
 
-- Unit tests
-- Integration tests
-- Repository tests
-- Controller tests
-- Security tests
-- Testcontainers
-
----
-
-## CI/CD
-
-GitHub Actions automatically:
-
-- Build project
-- Run tests
-- Verify code quality
-- Build Docker image
+* React
+* Vite
+* TypeScript
+* Axios
+* React Router
 
 ---
 
 ## Roadmap
 
-- [ ] Google OAuth2 Login
-- [ ] GitHub OAuth2 Login
-- [ ] Multi-factor Authentication (MFA)
-- [ ] Redis token blacklist
-- [ ] Email notifications
-- [ ] Audit dashboard
-- [ ] API rate limiting
-- [ ] Multi-tenancy
-- [ ] Session management
-- [ ] Kubernetes deployment
-
----
-
-## Documentation
-
-Additional documentation:
-
-- ARCHITECTURE.md
-- API.md
-- SECURITY.md
-- DEPLOYMENT.md
-- CONTRIBUTING.md
-- CHANGELOG.md
-
----
-
-## Why This Project?
-
-Most tutorials stop after implementing login.
-
-This project focuses on building an authentication service that reflects real-world backend engineering practices, including secure authentication, authorization, database migrations, testing, Docker deployment, and production-ready architecture. It is designed to serve as a reusable authentication service for Spring Boot applications.
+* Email verification
+* Forgot password
+* Password reset
+* Account lockout
+* Login attempt throttling
+* Two-factor authentication (2FA)
+* OAuth2 login (Google, GitHub)
+* Role & permission management
+* Admin dashboard
+* Audit logging
+* User profile management
 
 ---
 
 ## License
 
-This project is licensed under the MIT License.
+MIT License

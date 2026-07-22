@@ -7,6 +7,8 @@ import com.richardj46.authservice.config.JwtProperties;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -14,8 +16,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class JwtService {
-
-    private static final String ISSUER = "springboot-auth-service";
 
     private final JwtEncoder jwtEncoder;
     private final JwtProperties jwtProperties;
@@ -29,19 +29,22 @@ public class JwtService {
         Instant now = Instant.now();
         Instant expiresAt = now.plus(jwtProperties.getAccessTtl());
 
-        var authorities = userDetails.getAuthorities().stream()
+        var roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
+        JwsHeader header = JwsHeader.with(MacAlgorithm.HS256)
+                .keyId(jwtProperties.getKeyId())
+                .build();
+
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer(ISSUER)
                 .subject(userDetails.getUsername())
                 .issuedAt(now)
                 .expiresAt(expiresAt)
-                .claim("authorities", authorities)
+                .claim("roles", roles)
                 .build();
 
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+        return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
     }
 
     public long getAccessTokenExpiresInSeconds() {

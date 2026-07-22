@@ -1,3 +1,10 @@
+server:
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+    include-exception: false
+
 spring:
   application:
     name: springboot-auth-service
@@ -14,10 +21,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    open-in-view: false
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
 
   flyway:
     baseline-on-migrate: true
@@ -26,9 +34,23 @@ spring:
 app:
   jwt:
     secret: ${JWT_SECRET}
-    access-ttl: ${JWT_ACCESS_TTL:15m}
-    refresh-ttl: ${JWT_REFRESH_TTL:7d}
+    previous-secrets: ${JWT_PREVIOUS_SECRETS:}
+    key-id: ${JWT_KEY_ID:current}
+    access-ttl: ${JWT_ACCESS_TTL:10m}
+    refresh-ttl: ${JWT_REFRESH_TTL:30d}
     refresh-cookie-name: ${JWT_REFRESH_COOKIE_NAME:refresh_token}
     refresh-cookie-secure: ${JWT_REFRESH_COOKIE_SECURE:false}
+    refresh-cookie-same-site: ${JWT_REFRESH_COOKIE_SAME_SITE:Lax}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  security:
+    max-failed-login-attempts: ${MAX_FAILED_LOGIN_ATTEMPTS:5}
+    lockout-duration: ${ACCOUNT_LOCKOUT_DURATION:15m}
+    require-https: ${REQUIRE_HTTPS:false}
+
+logging:
+  level:
+    root: INFO
+    SECURITY_AUDIT: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
